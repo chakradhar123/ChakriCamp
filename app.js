@@ -13,7 +13,8 @@ const express   =require('express'),
 const commentRoutes=require("./routes/comments"),
       campgroundRoutes=require("./routes/campgrounds"),
       indexRoutes=require("./routes/index");
-mongoose.connect('mongodb+srv://chakri:chakri@cluster0-1el3w.mongodb.net/test?retryWrites=true', {useNewUrlParser: true,useCreateIndex: true},function(err) {
+const url=process.env.databaseUrl || "mongodb://localhost:27017/yemp_camp"
+mongoose.connect(url, {useNewUrlParser: true,useCreateIndex: true},function(err) {
     if (err) {
         console.log(err);
     } else {
