@@ -13,7 +13,14 @@ const express   =require('express'),
 const commentRoutes=require("./routes/comments"),
       campgroundRoutes=require("./routes/campgrounds"),
       indexRoutes=require("./routes/index");
-mongoose.connect('mongodb://localhost:27017/yelp_camp', {useNewUrlParser: true});    
+mongoose.connect('mongodb+srv://chakri:chakri@cluster0-1el3w.mongodb.net/test?retryWrites=true', {useNewUrlParser: true,useCreateIndex: true},function(err) {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log("mongoose atlas was successfully connected");
+    }
+});
+    
       
 app.use(bodyParser.urlencoded({extended:true}));
 app.set("view engine","ejs");
@@ -50,6 +57,6 @@ app.use("/campgrounds/:id/comments",commentRoutes);
 
 
 
-app.listen(3000,function(){
+app.listen(process.env.PORT || 8000,function(){
     console.log("The YelpCamp server has started!");
 });
