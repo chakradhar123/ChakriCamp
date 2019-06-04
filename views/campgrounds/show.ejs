@@ -10,11 +10,11 @@
                         <p class="float-right">$<%= campground.price %>/night</p>
                       <h5 class="card-title"><%= campground.name %></h5>
                       <p>
-                            <em>Submitted By <%= campground.author.username %></em>
+                            <em>Submitted By <a href="/users/<%= campground.author.id %>"><%= campground.author.username %></a></em>
                         </p>
                         <hr>
                       <p class="card-text"><%= campground.description %></p>
-                    <% if(currentUser && campground.author.id.equals(currentUser._id)){ %>
+                    <% if(currentUser && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
                     <a class="btn btn-xs btn-warning" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
                     <form class="delete-form" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST" >
                         <button class="btn btn-xs btn-danger" >DELETE</button>
@@ -43,7 +43,7 @@
                                 <div class="float-right">
                                   
                                   
-                                  <% if(currentUser && comment.author.id.equals(currentUser._id)){ %>
+                                  <% if(currentUser && comment.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin){ %>
                                   <div class="float-right">
                                     <a href="/campgrounds/<%=campground._id%>/comments/<%=comment._id%>/edit" class="btn btn-sm btn-warning">EDIT</a>
                                     <form class="delete-form" action="/campgrounds/<%=campground._id%>/comments/<%=comment._id%>?_method=DELETE" method="POST">
