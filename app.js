@@ -5,6 +5,7 @@ const express   =require('express'),
       flash=require("connect-flash"),
       passport=require("passport"),
       LocalStrategy=require("passport-local"),
+      FacebookStrategy = require('passport-facebook').Strategy,
       methodOverride=require("method-override"),
       Campground=require("./models/campground"),
       Comment=require("./models/comment"),
@@ -13,7 +14,7 @@ const express   =require('express'),
 const commentRoutes=require("./routes/comments"),
       campgroundRoutes=require("./routes/campgrounds"),
       indexRoutes=require("./routes/index");
-const url=process.env.databaseUrl || "mongodb://localhost:27017/yemp_camp"
+const url=process.env.databaseUrl || "mongodb://localhost:27017/yelp--camp"
 mongoose.connect(url, {useNewUrlParser: true,useCreateIndex: true},function(err) {
     if (err) {
         console.log(err);
@@ -41,8 +42,58 @@ app.use(require("express-session")({
 app.use(passport.initialize());
 app.use(passport.session());
 passport.use(new LocalStrategy(User.authenticate()));
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+
+
+
+passport.use(new FacebookStrategy({
+    clientID: process.env.clientID,
+    clientSecret: process.env.clientSecret,
+    callbackURL: process.env.callbackURL,
+    profileFields: ['email','name','photos']
+  },
+  function(accessToken, refreshToken, profile, done) {
+     
+    
+    process.nextTick(function() {
+        User.findOne({username:profile.name.givenName}, function(err, user) {
+            if (err){
+                req.flash("error", err.message);
+            return res.redirect("/register");
+            }
+                    ;
+                    if (user) {
+                        
+                        return done(null, user); 
+                    } else {
+                        let newUser=new User({username:profile.name.givenName,firstName:profile.name.familyName,lastName:profile.name.middleName,email:profile.emails[0].value,avatar:profile.photos[0].value});
+                            
+                        // save our user to the database
+                        newUser.save(function(err) {
+                            if (err){
+                                req.flash("error", err.message);
+                                return res.redirect("/register");
+                            }
+                                
+    
+                            // if successful, return the new user
+                            
+                            return done(null, newUser);
+                        });
+                    }
+                });
+            });
+  }
+));
+passport.serializeUser(function(user, done) {
+    done(null, user.id);
+  });
+  
+  passport.deserializeUser(function(id, done) {
+    User.findById(id, function(err, user) {
+      done(err, user);
+    });
+  });
+
 app.use(function (req,res,next){
     res.locals.currentUser=req.user;
     res.locals.error=req.flash("error");
